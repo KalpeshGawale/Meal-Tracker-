@@ -3,15 +3,13 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Daily Meal Expense Tracker</title>
-
+<title>Daily Meal Tracker</title>
 <style>
 :root{
   --primary:#6366f1;
   --bg:#0f172a;
   --card:#020617;
   --text:#e5e7eb;
-  --muted:#94a3b8;
   --danger:#ef4444;
 }
 
@@ -24,7 +22,6 @@ body{
   color:var(--text);
 }
 
-/* Header */
 header{
   background:linear-gradient(135deg,#4f46e5,#6366f1);
   padding:18px;
@@ -33,7 +30,6 @@ header{
   font-weight:600;
 }
 
-/* Layout */
 .container{
   max-width:900px;
   margin:20px auto;
@@ -54,30 +50,6 @@ header{
   color:#a5b4fc;
 }
 
-/* Inputs */
-label{
-  display:block;
-  font-size:14px;
-  margin-bottom:6px;
-}
-
-input{
-  width:100%;
-  padding:10px;
-  border-radius:8px;
-  border:none;
-  background:#1e293b;
-  color:white;
-  font-size:14px;
-}
-
-.row{
-  display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(150px,1fr));
-  gap:15px;
-}
-
-/* Meal buttons */
 .meals{
   display:flex;
   gap:12px;
@@ -102,7 +74,140 @@ input{
 
 .meal input{display:none}
 
-/* Buttons */
+button{
+  margin-top:15px;
+  padding:10px 18px;
+  border:none;
+  border-radius:10px;
+  background:var(--primary);
+  color:white;
+  font-size:14px;
+  cursor:pointer;
+}
+
+.delete-btn{
+  background:var(--danger);
+  padding:6px 10px;
+  font-size:13px;
+}
+
+table{
+  width:100%;
+  border-collapse:collapse;
+}
+
+th{
+  background:#4f46e5;
+  padding:12px;
+}
+
+td{
+  padding:12px;
+  text-align:center;
+  border-bottom:1px solid #1e293b;
+}
+</style>
+</head>
+<body>
+
+<header>🍽️ Daily Meal Tracker</header>
+
+<div class="container">
+
+<!-- Date -->
+<div class="card">
+<h2>Select Date</h2>
+<input type="date" id="mealDate">
+</div>
+
+<!-- Meals -->
+<div class="card">
+<h2>Meals Consumed</h2>
+<div class="meals">
+  <div class="meal" onclick="toggleMeal('breakfastCheck')">
+    <input type="checkbox" id="breakfastCheck"> Breakfast
+  </div>
+  <div class="meal" onclick="toggleMeal('lunchCheck')">
+    <input type="checkbox" id="lunchCheck"> Lunch
+  </div>
+  <div class="meal" onclick="toggleMeal('dinnerCheck')">
+    <input type="checkbox" id="dinnerCheck"> Dinner
+  </div>
+</div>
+<button onclick="saveDay()">Save Day</button>
+</div>
+
+<!-- Table -->
+<div class="card">
+<table id="mealTable">
+<thead>
+<tr>
+<th>Date</th>
+<th>Breakfast</th>
+<th>Lunch</th>
+<th>Dinner</th>
+<th></th>
+</tr>
+</thead>
+<tbody></tbody>
+</table>
+</div>
+
+</div>
+
+<script>
+let days = JSON.parse(localStorage.getItem("days")) || [];
+
+function formatDateDMY(iso){
+  if(!iso) return "";
+  const [y,m,d]=iso.split("-");
+  return `${d}-${m}-${y.slice(2)}`;
+}
+
+function toggleMeal(id){
+  const cb=document.getElementById(id);
+  cb.checked=!cb.checked;
+  cb.parentElement.classList.toggle("active",cb.checked);
+}
+
+function saveDay(){
+  const date=mealDate.value || new Date().toISOString().split("T")[0];
+  const b=breakfastCheck.checked;
+  const l=lunchCheck.checked;
+  const d=dinnerCheck.checked;
+
+  days.push({date,breakfast:b,lunch:l,dinner:d});
+  localStorage.setItem("days",JSON.stringify(days));
+  render();
+}
+
+function render(){
+  const tbody=document.querySelector("#mealTable tbody");
+  tbody.innerHTML="";
+
+  days.forEach((x,i)=>{
+    tbody.innerHTML+=`
+      <tr>
+        <td>${formatDateDMY(x.date)}</td>
+        <td>${x.breakfast?"✅":"—"}</td>
+        <td>${x.lunch?"✅":"—"}</td>
+        <td>${x.dinner?"✅":"—"}</td>
+        <td><button class="delete-btn" onclick="del(${i})">X</button></td>
+      </tr>`;
+  });
+}
+
+function del(i){
+  days.splice(i,1);
+  localStorage.setItem("days",JSON.stringify(days));
+  render();
+}
+
+render();
+</script>
+
+</body>
+</html>/* Buttons */
 button{
   margin-top:15px;
   padding:10px 18px;
