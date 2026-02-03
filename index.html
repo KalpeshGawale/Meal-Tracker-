@@ -107,9 +107,35 @@
       border-bottom: 1px solid #1e293b;
     }
 
-    #mealStats p {
-      margin: 6px 0;
+    #mealStats {
+      display: grid;
+      gap: 12px;
+    }
+
+    .summary-box {
+      border-radius: 12px;
+      padding: 15px;
+    }
+
+    .full-box {
+      background: #1e1b4b;
+      border: 2px solid #6366f1;
+    }
+
+    .partial-box {
+      background: #1e293b;
+      border: 2px solid #475569;
+    }
+
+    .summary-box h3 {
+      margin: 0 0 8px;
+      color: #a5b4fc;
+    }
+
+    .summary-box p {
+      margin: 4px 0;
       font-size: 1rem;
+      color: #e0e7ff;
     }
   </style>
 </head>
@@ -160,9 +186,19 @@
 
   <!-- Summary -->
   <div class="card" id="mealStats">
-    <h2>Meal Summary</h2>
-    <p id="fullDays"></p>
-    <p id="partialDays"></p>
+    <h2 style="text-align:center;color:#a5b4fc">🍱 Meal Summary</h2>
+
+    <div class="summary-box full-box">
+      <h3>✅ Full Meal Days</h3>
+      <p id="fullDays"></p>
+      <p id="fullDaysCost"></p>
+    </div>
+
+    <div class="summary-box partial-box">
+      <h3>🍽️ Partial Meal Days</h3>
+      <p id="partialDays"></p>
+      <p id="partialDaysCost"></p>
+    </div>
   </div>
 
 </div>
@@ -200,8 +236,11 @@ function render(){
 
   days.forEach((x,i)=>{
     const total=(x.breakfast?1:0)+(x.lunch?1:0)+(x.dinner?1:0);
-    if(total===3) full++;
-    else if(total>0) partial++;
+    if(total===3){
+      full++;
+    } else if(total>0){
+      partial++;
+    }
 
     tbody.innerHTML+=`
       <tr>
@@ -214,7 +253,9 @@ function render(){
   });
 
   document.getElementById("fullDays").innerText = `Days with all 3 meals: ${full}`;
+  document.getElementById("fullDaysCost").innerText = `Cost for full days: ${full} × 200 = ₹${full*200}`;
   document.getElementById("partialDays").innerText = `Days with 1 or 2 meals: ${partial}`;
+  document.getElementById("partialDaysCost").innerText = `Cost for partial days: ${partial} × 145 = ₹${partial*145}`;
 }
 
 function del(i){
