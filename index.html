@@ -1,175 +1,621 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Daily Meal Tracker</title>
-  <style>
-    :root {
-      --primary: #6366f1;
-      --bg: #0f172a;
-      --card: #020617;
-      --text: #e5e7eb;
-      --danger: #ef4444;
-    }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Daily Meal Tracker</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
-    * { box-sizing: border-box }
+<style>
+:root{
+  --bg-start:#0f0c29;
+  --bg-mid:#302b63;
+  --bg-end:#24243e;
+  --card-bg:rgba(255,255,255,0.05);
+  --card-border:rgba(255,255,255,0.1);
+  --input-bg:rgba(0,0,0,0.2);
+  --accent-primary:#8b5cf6;
+  --accent-secondary:#a78bfa;
+  --accent-glow:rgba(139,92,246,0.4);
+  --text-primary:#ffffff;
+  --text-secondary:#a1a1aa;
+  --text-muted:#71717a;
+  --danger:#ef4444;
+  --success:#22c55e;
+  --warning:#f59e0b;
+}
 
-    body {
-      margin: 0;
-      font-family: "Segoe UI", sans-serif;
-      background: var(--bg);
-      color: var(--text);
-    }
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+}
 
-    header {
-      background: linear-gradient(135deg, #4f46e5, #6366f1);
-      padding: 18px;
-      text-align: center;
-      font-size: 1.4rem;
-      font-weight: 600;
-    }
+body{
+  font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;
+  background:linear-gradient(135deg,var(--bg-start) 0%,var(--bg-mid) 50%,var(--bg-end) 100%);
+  background-attachment:fixed;
+  color:var(--text-primary);
+  min-height:100vh;
+  line-height:1.6;
+}
 
-    .container {
-      max-width: 900px;
-      margin: 20px auto;
-      padding: 0 15px;
-    }
+/* Background Animation */
+.bg-animation{
+  position:fixed;
+  top:0;
+  left:0;
+  width:100%;
+  height:100%;
+  pointer-events:none;
+  overflow:hidden;
+  z-index:0;
+}
 
-    .card {
-      background: var(--card);
-      border-radius: 14px;
-      padding: 20px;
-      margin-bottom: 20px;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-    }
+.bg-animation::before{
+  content:'';
+  position:absolute;
+  width:150%;
+  height:150%;
+  top:-25%;
+  left:-25%;
+  background:radial-gradient(circle at 20% 80%,rgba(139,92,246,0.15) 0%,transparent 50%),
+             radial-gradient(circle at 80% 20%,rgba(167,139,250,0.1) 0%,transparent 50%);
+  animation:pulse 15s ease-in-out infinite;
+}
 
-    .card h2 {
-      margin: 0 0 15px;
-      font-size: 1.1rem;
-      color: #a5b4fc;
-    }
+@keyframes pulse{
+  0%,100%{transform:scale(1) rotate(0deg);}
+  50%{transform:scale(1.1) rotate(5deg);}
+}
 
-    .meals {
-      display: flex;
-      gap: 12px;
-      flex-wrap: wrap;
-    }
+/* Navigation */
+nav{
+  position:sticky;
+  top:0;
+  z-index:100;
+  backdrop-filter:blur(20px);
+  background:rgba(15,12,41,0.8);
+  border-bottom:1px solid var(--card-border);
+  padding:16px 20px;
+}
 
-    .meal {
-      flex: 1;
-      min-width: 120px;
-      padding: 14px;
-      text-align: center;
-      border-radius: 12px;
-      background: #020617;
-      border: 2px solid #1e293b;
-      cursor: pointer;
-    }
+.nav-content{
+  max-width:900px;
+  margin:0 auto;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
 
-    .meal.active {
-      border-color: var(--primary);
-      background: #1e1b4b;
-    }
+.logo{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  font-size:1.25rem;
+  font-weight:700;
+  color:var(--accent-secondary);
+}
 
-    .meal input { display: none }
+.logo i{
+  font-size:1.5rem;
+  color:var(--accent-secondary);
+}
 
-    button {
-      margin-top: 15px;
-      padding: 10px 18px;
-      border: none;
-      border-radius: 10px;
-      background: var(--primary);
-      color: white;
-      font-size: 14px;
-      cursor: pointer;
-    }
+.nav-badge{
+  background:rgba(139,92,246,0.2);
+  border:1px solid rgba(139,92,246,0.3);
+  padding:8px 16px;
+  border-radius:20px;
+  font-size:0.875rem;
+  font-weight:600;
+  color:var(--accent-secondary);
+  display:flex;
+  align-items:center;
+  gap:6px;
+}
 
-    .delete-btn {
-      background: var(--danger);
-      padding: 6px 10px;
-      font-size: 13px;
-    }
+/* Container */
+.container{
+  max-width:900px;
+  margin:0 auto;
+  padding:20px;
+  position:relative;
+  z-index:1;
+}
 
-    table {
-      width: 100%;
-      border-collapse: collapse;
-    }
+/* Cards */
+.card{
+  background:var(--card-bg);
+  backdrop-filter:blur(20px);
+  border:1px solid var(--card-border);
+  border-radius:24px;
+  padding:24px;
+  margin-bottom:20px;
+  transition:all 0.3s ease;
+}
 
-    th {
-      background: #4f46e5;
-      padding: 12px;
-    }
+.card:hover{
+  border-color:rgba(139,92,246,0.3);
+  transform:translateY(-2px);
+  box-shadow:0 20px 40px rgba(0,0,0,0.4),0 0 60px rgba(139,92,246,0.1);
+}
 
-    td {
-      padding: 12px;
-      text-align: center;
-      border-bottom: 1px solid #1e293b;
-    }
+.card-header{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  margin-bottom:20px;
+}
 
-    #mealStats {
-      display: grid;
-      gap: 12px;
-    }
+.card-icon{
+  width:44px;
+  height:44px;
+  border-radius:12px;
+  background:linear-gradient(135deg,var(--accent-primary),var(--accent-secondary));
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:1.25rem;
+  color:white;
+  box-shadow:0 8px 20px rgba(139,92,246,0.3);
+}
 
-    .summary-box {
-      border-radius: 12px;
-      padding: 15px;
-    }
+.card h2{
+  font-size:1.25rem;
+  font-weight:700;
+  color:var(--text-primary);
+}
 
-    .full-box {
-      background: #1e1b4b;
-      border: 2px solid #6366f1;
-    }
+/* Date Input */
+.date-wrapper{
+  position:relative;
+  background:var(--input-bg);
+  border:1px solid var(--card-border);
+  border-radius:12px;
+  display:flex;
+  align-items:center;
+  overflow:hidden;
+  transition:all 0.3s ease;
+}
 
-    .partial-box {
-      background: #1e293b;
-      border: 2px solid #475569;
-    }
+.date-wrapper:focus-within{
+  border-color:var(--accent-primary);
+  box-shadow:0 0 0 3px rgba(139,92,246,0.1);
+}
 
-    .summary-box h3 {
-      margin: 0 0 8px;
-      color: #a5b4fc;
-    }
+.date-wrapper i{
+  padding:14px 0 14px 16px;
+  color:var(--text-muted);
+}
 
-    .summary-box p {
-      margin: 4px 0;
-      font-size: 1rem;
-      color: #e0e7ff;
-    }
-  </style>
+input[type="date"]{
+  flex:1;
+  padding:14px 16px;
+  border:none;
+  background:transparent;
+  color:var(--text-primary);
+  font-size:1rem;
+  font-family:inherit;
+  outline:none;
+  cursor:pointer;
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator{
+  filter:invert(1);
+  cursor:pointer;
+}
+
+/* Meal Selection */
+.meals{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(140px,1fr));
+  gap:16px;
+}
+
+.meal{
+  position:relative;
+  padding:20px;
+  text-align:center;
+  border-radius:16px;
+  background:var(--input-bg);
+  border:2px solid var(--card-border);
+  cursor:pointer;
+  transition:all 0.3s ease;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:10px;
+}
+
+.meal:hover{
+  border-color:rgba(139,92,246,0.5);
+  transform:translateY(-2px);
+}
+
+.meal.active{
+  border-color:var(--accent-primary);
+  background:linear-gradient(135deg,rgba(139,92,246,0.2),rgba(167,139,250,0.1));
+  box-shadow:0 8px 24px rgba(139,92,246,0.3);
+}
+
+.meal-icon{
+  width:48px;
+  height:48px;
+  border-radius:12px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:1.5rem;
+  background:rgba(255,255,255,0.05);
+  transition:all 0.3s ease;
+}
+
+.meal.active .meal-icon{
+  background:linear-gradient(135deg,var(--accent-primary),var(--accent-secondary));
+  transform:scale(1.1);
+}
+
+.meal-text{
+  font-weight:600;
+  font-size:0.95rem;
+}
+
+.meal-check{
+  position:absolute;
+  top:10px;
+  right:10px;
+  width:24px;
+  height:24px;
+  border-radius:50%;
+  background:var(--success);
+  color:white;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:0.75rem;
+  opacity:0;
+  transform:scale(0);
+  transition:all 0.3s ease;
+}
+
+.meal.active .meal-check{
+  opacity:1;
+  transform:scale(1);
+}
+
+.meal input{display:none}
+
+/* Buttons */
+.btn{
+  width:100%;
+  padding:16px;
+  border:none;
+  border-radius:12px;
+  font-size:1rem;
+  font-weight:600;
+  font-family:inherit;
+  cursor:pointer;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:10px;
+  margin-top:20px;
+  transition:all 0.3s ease;
+}
+
+.btn-primary{
+  background:linear-gradient(135deg,var(--accent-primary),var(--accent-secondary));
+  color:white;
+  box-shadow:0 8px 24px rgba(139,92,246,0.4);
+}
+
+.btn-primary:hover{
+  transform:translateY(-2px);
+  box-shadow:0 12px 32px rgba(139,92,246,0.5);
+}
+
+.btn-primary:active{
+  transform:scale(0.98);
+}
+
+/* Table */
+.table-container{
+  overflow-x:auto;
+  border-radius:16px;
+  border:1px solid var(--card-border);
+}
+
+table{
+  width:100%;
+  border-collapse:collapse;
+  font-size:0.95rem;
+}
+
+thead{
+  background:linear-gradient(135deg,var(--accent-primary),var(--accent-secondary));
+}
+
+th{
+  padding:16px 12px;
+  font-weight:600;
+  text-transform:uppercase;
+  font-size:0.8rem;
+  letter-spacing:0.05em;
+  color:white;
+}
+
+th:first-child{
+  border-radius:16px 0 0 0;
+}
+
+th:last-child{
+  border-radius:0 16px 0 0;
+}
+
+td{
+  padding:16px 12px;
+  text-align:center;
+  border-bottom:1px solid var(--card-border);
+  background:rgba(0,0,0,0.1);
+}
+
+tbody tr:hover td{
+  background:rgba(139,92,246,0.05);
+}
+
+tbody tr:last-child td:first-child{
+  border-radius:0 0 0 16px;
+}
+
+tbody tr:last-child td:last-child{
+  border-radius:0 0 16px 0;
+}
+
+/* Status Icons */
+.status{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  width:32px;
+  height:32px;
+  border-radius:8px;
+  font-size:0.875rem;
+}
+
+.status-yes{
+  background:rgba(34,197,94,0.2);
+  color:var(--success);
+}
+
+.status-no{
+  background:rgba(239,68,68,0.2);
+  color:var(--danger);
+}
+
+/* Delete Button */
+.delete-btn{
+  background:rgba(239,68,68,0.1);
+  border:1px solid rgba(239,68,68,0.2);
+  color:var(--danger);
+  padding:8px 12px;
+  border-radius:8px;
+  cursor:pointer;
+  transition:all 0.3s ease;
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  font-size:0.875rem;
+}
+
+.delete-btn:hover{
+  background:rgba(239,68,68,0.2);
+  transform:scale(1.05);
+}
+
+/* Summary Cards */
+.summary-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
+  gap:16px;
+  margin-top:20px;
+}
+
+.summary-card{
+  background:rgba(0,0,0,0.2);
+  border:1px solid var(--card-border);
+  border-radius:16px;
+  padding:20px;
+  display:flex;
+  align-items:center;
+  gap:16px;
+  transition:all 0.3s ease;
+}
+
+.summary-card:hover{
+  border-color:var(--accent-primary);
+  transform:translateX(4px);
+}
+
+.summary-icon{
+  width:48px;
+  height:48px;
+  border-radius:12px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:1.25rem;
+}
+
+.summary-icon.full{
+  background:linear-gradient(135deg,var(--success),#10b981);
+  color:white;
+}
+
+.summary-icon.partial{
+  background:linear-gradient(135deg,var(--warning),#fbbf24);
+  color:white;
+}
+
+.summary-content h4{
+  font-size:1rem;
+  font-weight:600;
+  margin-bottom:4px;
+}
+
+.summary-content p{
+  font-size:0.875rem;
+  color:var(--text-muted);
+  margin:0;
+}
+
+.summary-amount{
+  margin-left:auto;
+  font-size:1.25rem;
+  font-weight:700;
+  color:var(--accent-secondary);
+}
+
+/* Empty State */
+.empty-state{
+  text-align:center;
+  padding:40px;
+  color:var(--text-muted);
+}
+
+.empty-state i{
+  font-size:3rem;
+  margin-bottom:16px;
+  opacity:0.5;
+}
+
+/* Footer */
+footer{
+  text-align:center;
+  padding:40px 20px;
+  position:relative;
+  z-index:1;
+}
+
+.creator-badge{
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  padding:10px 20px;
+  background:rgba(139,92,246,0.1);
+  border:1px solid rgba(139,92,246,0.2);
+  border-radius:50px;
+  font-size:0.875rem;
+  color:var(--text-secondary);
+  transition:all 0.3s ease;
+}
+
+.creator-badge:hover{
+  background:rgba(139,92,246,0.15);
+  border-color:rgba(139,92,246,0.3);
+  transform:translateY(-2px);
+}
+
+.creator-name{
+  font-weight:600;
+  color:var(--accent-secondary);
+}
+
+/* Responsive */
+@media(max-width:640px){
+  .meals{
+    grid-template-columns:1fr;
+  }
+  
+  th,td{
+    padding:12px 8px;
+    font-size:0.875rem;
+  }
+}
+</style>
 </head>
 <body>
 
-<header>🍽️ Daily Meal Tracker</header>
+<div class="bg-animation"></div>
+
+<nav>
+  <div class="nav-content">
+    <div class="logo">
+      <i class="fas fa-utensils"></i>
+      <span>MealTracker</span>
+    </div>
+    <div class="nav-badge">
+      <i class="fas fa-check-circle"></i>
+      Daily Tracking
+    </div>
+  </div>
+</nav>
 
 <div class="container">
 
-  <!-- Date -->
-  <div class="card">
+<!-- Date -->
+<div class="card">
+  <div class="card-header">
+    <div class="card-icon">
+      <i class="fas fa-calendar-alt"></i>
+    </div>
     <h2>Select Date</h2>
+  </div>
+  <div class="date-wrapper">
+    <i class="fas fa-calendar"></i>
     <input type="date" id="mealDate">
   </div>
+</div>
 
-  <!-- Meals -->
-  <div class="card">
-    <h2>Meals Consumed</h2>
-    <div class="meals">
-      <div class="meal" onclick="toggleMeal('breakfastCheck')">
-        <input type="checkbox" id="breakfastCheck"> Breakfast
-      </div>
-      <div class="meal" onclick="toggleMeal('lunchCheck')">
-        <input type="checkbox" id="lunchCheck"> Lunch
-      </div>
-      <div class="meal" onclick="toggleMeal('dinnerCheck')">
-        <input type="checkbox" id="dinnerCheck"> Dinner
-      </div>
+<!-- Meals -->
+<div class="card">
+  <div class="card-header">
+    <div class="card-icon" style="background:linear-gradient(135deg,#f59e0b,#fbbf24);">
+      <i class="fas fa-hamburger"></i>
     </div>
-    <button onclick="saveDay()">Save Day</button>
+    <h2>Meals Consumed</h2>
   </div>
+  
+  <div class="meals">
+    <div class="meal" onclick="toggleMeal('breakfastCheck')">
+      <input type="checkbox" id="breakfastCheck">
+      <div class="meal-check"><i class="fas fa-check"></i></div>
+      <div class="meal-icon">🌅</div>
+      <div class="meal-text">Breakfast</div>
+    </div>
+    
+    <div class="meal" onclick="toggleMeal('lunchCheck')">
+      <input type="checkbox" id="lunchCheck">
+      <div class="meal-check"><i class="fas fa-check"></i></div>
+      <div class="meal-icon">☀️</div>
+      <div class="meal-text">Lunch</div>
+    </div>
+    
+    <div class="meal" onclick="toggleMeal('dinnerCheck')">
+      <input type="checkbox" id="dinnerCheck">
+      <div class="meal-check"><i class="fas fa-check"></i></div>
+      <div class="meal-icon">🌙</div>
+      <div class="meal-text">Dinner</div>
+    </div>
+  </div>
+  
+  <button class="btn btn-primary" onclick="saveDay()">
+    <i class="fas fa-save"></i>
+    Save Day
+  </button>
+</div>
 
-  <!-- Table -->
-  <div class="card">
+<!-- Table -->
+<div class="card">
+  <div class="card-header">
+    <div class="card-icon" style="background:linear-gradient(135deg,#3b82f6,#06b6d4);">
+      <i class="fas fa-list-alt"></i>
+    </div>
+    <h2>Meal History</h2>
+  </div>
+  
+  <div class="table-container">
     <table id="mealTable">
       <thead>
         <tr>
@@ -177,31 +623,24 @@
           <th>Breakfast</th>
           <th>Lunch</th>
           <th>Dinner</th>
-          <th></th>
+          <th>Action</th>
         </tr>
       </thead>
       <tbody></tbody>
     </table>
   </div>
-
-  <!-- Summary -->
-  <div class="card" id="mealStats">
-    <h2 style="text-align:center;color:#a5b4fc">🍱 Meal Summary</h2>
-
-    <div class="summary-box full-box">
-      <h3>✅ Full Meal Days</h3>
-      <p id="fullDays"></p>
-      <p id="fullDaysCost"></p>
-    </div>
-
-    <div class="summary-box partial-box">
-      <h3>🍽️ Partial Meal Days</h3>
-      <p id="partialDays"></p>
-      <p id="partialDaysCost"></p>
-    </div>
-  </div>
+  
+  <div id="summarySection"></div>
+</div>
 
 </div>
+
+<footer>
+  <div class="creator-badge">
+    <i class="fas fa-code"></i>
+    <span>Crafted by <span class="creator-name">Kalpesh Gawale</span></span>
+  </div>
+</footer>
 
 <script>
 let days = JSON.parse(localStorage.getItem("days")) || [];
@@ -224,45 +663,116 @@ function saveDay(){
   const l=lunchCheck.checked;
   const d=dinnerCheck.checked;
 
-  days.push({date,breakfast:b,lunch:l,dinner:d});
+  // Check if date already exists
+  const existingIndex = days.findIndex(x => x.date === date);
+  if(existingIndex !== -1){
+    days[existingIndex] = {date,breakfast:b,lunch:l,dinner:d};
+  } else {
+    days.push({date,breakfast:b,lunch:l,dinner:d});
+  }
+  
   localStorage.setItem("days",JSON.stringify(days));
+  
+  // Reset checkboxes
+  breakfastCheck.checked = false;
+  lunchCheck.checked = false;
+  dinnerCheck.checked = false;
+  document.querySelectorAll('.meal').forEach(m => m.classList.remove('active'));
+  
   render();
 }
 
 function render(){
   const tbody=document.querySelector("#mealTable tbody");
   tbody.innerHTML="";
-  let full=0, partial=0;
+
+  if(days.length === 0){
+    tbody.innerHTML=`
+      <tr>
+        <td colspan="5" class="empty-state">
+          <i class="fas fa-utensils"></i>
+          <p>No meals recorded yet. Start tracking today!</p>
+        </td>
+      </tr>
+    `;
+    document.getElementById('summarySection').innerHTML = '';
+    return;
+  }
+
+  // Sort by date
+  days.sort((a,b) => new Date(b.date) - new Date(a.date));
 
   days.forEach((x,i)=>{
-    const total=(x.breakfast?1:0)+(x.lunch?1:0)+(x.dinner?1:0);
-    if(total===3){
-      full++;
-    } else if(total>0){
-      partial++;
-    }
-
+    const mealCount = (x.breakfast?1:0) + (x.lunch?1:0) + (x.dinner?1:0);
+    const rowClass = mealCount === 3 ? 'style="background:rgba(34,197,94,0.05);"' : 
+                     mealCount === 0 ? 'style="background:rgba(239,68,68,0.05);"' : '';
+    
     tbody.innerHTML+=`
-      <tr>
-        <td>${formatDateDMY(x.date)}</td>
-        <td>${x.breakfast?"✅":"—"}</td>
-        <td>${x.lunch?"✅":"—"}</td>
-        <td>${x.dinner?"✅":"—"}</td>
-        <td><button class="delete-btn" onclick="del(${i})">X</button></td>
+      <tr ${rowClass}>
+        <td><strong>${formatDateDMY(x.date)}</strong></td>
+        <td><span class="status ${x.breakfast?'status-yes':'status-no'}"><i class="fas fa-${x.breakfast?'check':'times'}"></i></span></td>
+        <td><span class="status ${x.lunch?'status-yes':'status-no'}"><i class="fas fa-${x.lunch?'check':'times'}"></i></span></td>
+        <td><span class="status ${x.dinner?'status-yes':'status-no'}"><i class="fas fa-${x.dinner?'check':'times'}"></i></span></td>
+        <td><button class="delete-btn" onclick="del(${i})"><i class="fas fa-trash"></i> Delete</button></td>
       </tr>`;
   });
 
-  document.getElementById("fullDays").innerText = `Days with all 3 meals: ${full}`;
-  document.getElementById("fullDaysCost").innerText = `Cost for full days: ${full} × 200 = ₹${full*200}`;
-  document.getElementById("partialDays").innerText = `Days with 1 or 2 meals: ${partial}`;
-  document.getElementById("partialDaysCost").innerText = `Cost for partial days: ${partial} × 145 = ₹${partial*145}`;
+  renderSummary();
+}
+
+function renderSummary(){
+  const fullDays = days.filter(x => x.breakfast && x.lunch && x.dinner).length;
+  const partialDays = days.filter(x => {
+    const count = (x.breakfast?1:0) + (x.lunch?1:0) + (x.dinner?1:0);
+    return count > 0 && count < 3;
+  }).length;
+  
+  const fullCost = fullDays * 200;
+  const partialCost = partialDays * 145;
+  const total = fullCost + partialCost;
+
+  document.getElementById('summarySection').innerHTML = `
+    <div class="summary-grid">
+      <div class="summary-card">
+        <div class="summary-icon full"><i class="fas fa-check-double"></i></div>
+        <div class="summary-content">
+          <h4>Full Meal Days</h4>
+          <p>${fullDays} days with all 3 meals</p>
+        </div>
+        <div class="summary-amount">₹${fullCost}</div>
+      </div>
+      
+      <div class="summary-card">
+        <div class="summary-icon partial"><i class="fas fa-adjust"></i></div>
+        <div class="summary-content">
+          <h4>Partial Days</h4>
+          <p>${partialDays} days with 1-2 meals</p>
+        </div>
+        <div class="summary-amount">₹${partialCost}</div>
+      </div>
+    </div>
+    
+    <div class="summary-card" style="margin-top:16px;background:linear-gradient(135deg,rgba(139,92,246,0.1),rgba(167,139,250,0.05));border-color:rgba(139,92,246,0.3);">
+      <div class="summary-icon" style="background:linear-gradient(135deg,var(--accent-primary),var(--accent-secondary));"><i class="fas fa-wallet"></i></div>
+      <div class="summary-content">
+        <h4>Total Cost</h4>
+        <p>All meals combined</p>
+      </div>
+      <div class="summary-amount" style="font-size:1.5rem;">₹${total}</div>
+    </div>
+  `;
 }
 
 function del(i){
-  days.splice(i,1);
-  localStorage.setItem("days",JSON.stringify(days));
-  render();
+  if(confirm('Are you sure you want to delete this entry?')){
+    days.splice(i,1);
+    localStorage.setItem("days",JSON.stringify(days));
+    render();
+  }
 }
+
+// Set today's date by default
+document.getElementById('mealDate').value = new Date().toISOString().split("T")[0];
 
 render();
 </script>
